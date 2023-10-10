@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block body %}
+<section>
+    <h2>What is the captcha image generator?</h2>
+    <p>Captcha Image Generator is a tool that provides an API to create captcha code with images. The API endpoint returns captcha code hashed value and image in base64 format.</p>
+</section>
+
+<section>
+    <h2>What is the pricing of API?</h2>
+    <p>It's free to use the API. It's free but has limit of 60 requests per minute and then returns <strong>"429 Too many requests"</strong>. If your application need to do more requests than the limit, you can host this or use the functions in your app easily.</p>
+    <p>Source code can be found on <a href="https://github.com/hakiKhuva/captcha-generator" target="_blank">GitHub</a></p>
+</section>
+
+<section>
+    <h2>How to use this API?</h2>
+    <p>Hey, Just make the <code>POST</code> METHOD request to <code>{{request.host_url.rstrip('/')}}/api</code>. An example is at the end of webpage showing how to use the API.</p>
+</section>
+
+<section>
+    <h2>What is the response of API?</h2>
+    <table>
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>
+                <code>status</code>
+            </td>
+            <td>
+                <code>ok</code><span>,</span><code>error</code>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <code>image</code>
+            </td>
+            <td>BASE64 Encoded value of Image</td>
+        </tr>
+        <tr>
+            <td>
+                <code>captcha_hash</code>
+            </td>
+            <td>SHA256 hashed value of captcha code</td>
+        </tr>
+    </table>
+    <ul>
+        <li>
+            <p>200 status code: working as expected</p>
+        </li>
+        <li>
+            <p>429 status code: you've requested too many times</p>
+            <ul>
+                <li>The response won't be in JSON.</li>
+            </ul>
+        </li>
+        <li>
+            <p>500 status code: something went wrong on server</p>
+            <ul>
+                <li>The response won't be in JSON.</li>
+            </ul>
+        </li>
+    </ul>
+</section>
+
+<section>
+    <h2>Captcha code</h2>
+    <p>By default API returns <code>SHA256</code> hashed value of captcha code. If you want to generate hashed value in browser, see <a href="https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest">"SubtleCrypto: digest() method - Web APIs | MDN"</a> </p>
+    <p>The original value for captcha code is 6 letters long.</p>
+</section>
+
+<section>
+    <h2>Captcha Image</h2>
+    <p>Image will be in base64 encode value, this image size is 150x50. Image width is 150 and height is 50. Background color of image is white and random text color is used.</p>
+</section>
+
+<section>
+    <h2>Captcha image form</h2>
+    <iframe src="{{ url_for('api_example') }}" frameborder="0" style="background-color: white;"></iframe>
+</section>
+
+<section>
+    <h2>Captcha image form code</h2>
+    <textarea id="code-captcha-form" style="height: 650px; width: calc( 100% - 40px ); padding: 20px" disabled></textarea>
+    <script>
+        fetch("{{ url_for('api_example') }}")
+        .then(resp => resp.text())
+        .then(data => {
+            document.querySelector("#code-captcha-form").value = data;
+        })
+    </script>
+</section>
+{% endblock %}

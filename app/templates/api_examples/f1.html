@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <img src="" alt="captcha image" id="captcha-image" border="1">
+    <hr>
+    <form id="captcha-form">
+        <label for="captcha-code">Enter letters displayed in above image</label>
+        <input type="text" id="captcha-code" />
+        <button type="submit">Verify</button>
+    </form>
+    <script>
+        const getSHA256 = async (text) => {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data)
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("");
+            return hashHex;
+        }
+
+        fetch("{{ request.host_url.removesuffix('/') }}/api", {
+            method: "POST"
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if(data.status === "ok"){
+                document.getElementById("captcha-image").setAttribute("src", `data:image/png;base64,${data.image}`)
+                document.getElementById("captcha-form").addEventListener("submit", e => {
+                    e.preventDefault()
+                    const captchaCodeElement = document.getElementById("captcha-code");
+                    getSHA256(captchaCodeElement.value)
+                    .then((hashedCaptchaCode) => {
+                        if(captchaCodeElement){
+                            if(hashedCaptchaCode === data.captcha_hash){
+                                alert("Verified successfully.")
+                            } else {
+                                alert("Incorrect code, tryagain!")
+                            }
+                        } else {
+                            alert("No element found on the webpage!")
+                        }
+                    })
+                    .catch(err => {
+                        console.log("Your browser does not support SubtleCrypto: digest() method or another error occured!");
+                    })
+                })
+            } else {
+                alert("Could not fetch the data, refresh the page!")
+            }
+        })
+        .catch(error => {
+            alert("Could not fetch the data, refresh the page!")
+        })
+    </script>
+</body>
+</html>
