@@ -28,6 +28,10 @@ def api_limiter(f):
         datetime_sub_60s = datetime.datetime.utcnow() - datetime.timedelta(seconds=60)
         current_user_ip_address = get_ip_address()
 
+        db.remove([
+            requests_model["datetime"].less_than_equal(datetime_sub_60s.isoformat()),
+        ])
+
         requests_count = db.count(
             db.get([
                 requests_model["datetime"].greater_than(datetime_sub_60s.isoformat()),
